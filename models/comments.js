@@ -1,13 +1,46 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const Treads = require('./treads');
+const Boards = require('./boards');
+
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema({
-  title: String,
-  text: String,
-  imageUrl: String,
-  replyes: [{
-    type: mongoose.Types.ObjectId
-  }]
-}, {timestamped: true});
+    title: {
+        type: String,
+        required: true
+    },
+    text: {
+        type: String,
+        required: true
+    },
+    imagesUrl: [{
+        type: Object
+    }],
+    replyes: [{
+        type: mongoose.Types.ObjectId,
+        ref: 'Comments'
+    }],
+    treadId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Treads',
+        required: true
+    }
+}, { timestamps: true });
 
-module.exports = mongoose.model('Comment', commentSchema);
+commentSchema.statics.deleteID = async function(id) {
+    const commentId = id;
+    const comment = await this.findByIdAndRemove(commentId);
+    console.log(comment.imagesUrl);
+    comment.imagesUrl.forEach(img => fs.unlink(img.path, err => console.log(err)));
+
+
+    const tread = await Treads.findById(comment.treadId);
+    console.log(tread)
+    tread.comments.splice(tread.comments.findIndex(bComment => bComment._id === commentId), 1);
+    await tread.save();
+
+    return comment;
+}
+
+module.exports = mongoose.model('Comments', commentSchema);
