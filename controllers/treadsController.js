@@ -16,11 +16,7 @@ exports.create = async (req, res, next) => {
             throw 'error';
         }
         
-        const { title, text } = req.body;
-        const imagesUrl = req.files.map(file => ({
-            url: `${ process.env.HOST }/images/${ file.filename }`,
-            path: file.path
-        }));
+        const { title, text, imagesUrl } = req.body;
         const boardId = req.params.boardId;
         
         const tread = new Treads({
@@ -58,19 +54,11 @@ exports.edit = async (req, res, next) => {
     }
     
     const treadId = req.params.treadId;
-    const { title, text } = req.body;
+    const { title, text, imagesUrl } = req.body;
     
     const tread = await Treads.findById(treadId);
     tread.title = title;
     tread.text = text;
-    
-    
-    const imagesUrl = req.files.map(file => ({
-        url: `${ process.env.HOST }/images/${ file.filename }`,
-        path: file.path
-    }));
-    
-    tread.imagesUrl.forEach(img => fs.unlink(img.path, err => console.log(err)))
     tread.imagesUrl = imagesUrl
     
     const upTread = await tread.save();

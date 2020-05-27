@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Boards = require('./boards');
-const fs = require('fs');
 
 const Schema = mongoose.Schema;
 
@@ -33,7 +32,6 @@ treadSchema.statics.deleteID = async function(id) {
     const board = await Boards.findById(tread.boardId);
     board.treads.splice(board.treads.findIndex(bTread => bTread._id === id), 1);
 
-    tread.imagesUrl.forEach(img => fs.unlink(img.path, err => console.log(err)));
 
     await board.save();
     return tread;

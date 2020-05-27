@@ -1,5 +1,6 @@
 const { param, body, header } = require('express-validator');
 const Treads = require('../models/treads');
+const { isURL } = require('validator');
 
 const bodyCheck = [
     body('title', 'Некорректный заголовок')
@@ -15,10 +16,14 @@ const bodyCheck = [
     body('imagesUrl')
         .if(body('imagesUrl').exists())
         .isArray()
+        .custom((value, context) =>
+            value.every(url => isURL(url))
+        )
         .withMessage('ссылки должны быть валидными url')
 ];
 
 exports.create = [
+    ...bodyCheck,
     param('treadId')
         .notEmpty()
         .withMessage('treadId must exist')
@@ -36,6 +41,7 @@ exports.create = [
 ]
 
 exports.edit = [
+    ...bodyCheck,
     header('Authorization')
         .trim()
         .isString()

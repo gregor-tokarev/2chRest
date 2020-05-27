@@ -5,11 +5,9 @@ const socketManager = require('./core/socket');
 require('dotenv').config();
 const path = require('path');
 
-
 //* middleware
 const errorHandler = require('./middleware/errorHandeling');
 const corsSet = require('./middleware/cors');
-const fileUpload = require('./middleware/fileUpload');
 
 //* Importing Routers
 const errorRoutes = require('./routes/error');
@@ -21,7 +19,6 @@ const commentRoutes = require('./routes/comments');
 app.use(express.static(path.resolve(__dirname, 'data')));
 app.use(express.json()); // parse body json in any req
 app.use(express.urlencoded({ extended: false })); // parse body formData in any req
-app.use(fileUpload.array('img', 12)); // parse file and save it to data/images
 app.use(corsSet);
 
 app.use('/tread', treadRoutes);

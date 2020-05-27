@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
 const Treads = require('./treads');
 const Boards = require('./boards');
 
@@ -31,12 +30,8 @@ const commentSchema = new Schema({
 commentSchema.statics.deleteID = async function(id) {
     const commentId = id;
     const comment = await this.findByIdAndRemove(commentId);
-    console.log(comment.imagesUrl);
-    comment.imagesUrl.forEach(img => fs.unlink(img.path, err => console.log(err)));
-
-
+    
     const tread = await Treads.findById(comment.treadId);
-    console.log(tread)
     tread.comments.splice(tread.comments.findIndex(bComment => bComment._id === commentId), 1);
     await tread.save();
 

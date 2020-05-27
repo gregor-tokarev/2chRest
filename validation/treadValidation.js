@@ -1,5 +1,5 @@
 const { param, body, header } = require('express-validator');
-const validator = require('validator');
+const { isURL } = require('validator');
 const Board = require('../models/boards');
 
 const bodyCheck = [
@@ -16,6 +16,10 @@ const bodyCheck = [
     body('imagesUrl')
         .if(body('imagesUrl').exists())
         .isArray()
+        .withMessage('Не массив')
+        .custom((value, context) =>
+            value.every(url => isURL(url))
+        )
         .withMessage('ссылки должны быть валидным url')
 ]
 
