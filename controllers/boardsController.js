@@ -56,7 +56,7 @@ exports.getTreads = async (req, res, next) => {
 }
 
 exports.boards = async (req, res, next) => {
-    const boards = await Board.find().select('-treads -__v');
+    const boards = await Board.find().select('-treads');
     res.status(200).json(boards)
 }
 
