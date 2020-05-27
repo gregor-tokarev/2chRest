@@ -12,11 +12,12 @@ exports.createBoard = async (req, res, next) => {
             throw 'error';
         }
         
-        const { title, description, theme } = req.body;
+        const { title, description, theme, name } = req.body;
         const board = new Board({
             title,
             description,
-            theme
+            theme,
+            name
         })
         const upBoard = await board.save();
         res.status(201).json({

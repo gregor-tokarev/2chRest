@@ -13,6 +13,9 @@ const boardSchema = new Schema({
     theme: {
         type: String
     },
+    name: {
+        type: String
+    },
     treads: [{
         type: mongoose.Types.ObjectId,
         ref: 'Treads'
@@ -21,10 +24,7 @@ const boardSchema = new Schema({
 
 boardSchema.statics.getTreadsCount = function(boardId) {
     return this.findById(boardId)
-        .then(board => {
-          const treadLengt = board.treads.length;
-          return treadLengt;
-        })
+        .then(board => board.treads.length)
 }
 
 module.exports = mongoose.model('Boards', boardSchema)
