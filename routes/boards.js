@@ -6,7 +6,9 @@ const boardsController = require('../controllers/boardsController');
 
 router.post('/', validator.create, boardsController.createBoard);
 
-router.get('/', boardsController.boards)
+router.get('/', boardsController.boards);
+
+router.get('/one/:boardName', boardsController.oneBoard);
 
 router.get('/treads/:boardId', boardsController.getTreads);
 

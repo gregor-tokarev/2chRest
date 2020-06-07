@@ -1,4 +1,5 @@
 const Board = require('../models/boards');
+const Treads = require('../models/treads');
 const { validationResult } = require('express-validator');
 
 
@@ -35,13 +36,10 @@ exports.getTreads = async (req, res, next) => {
     to = parseInt(to);
     const boardId = req.params.boardId;
     if (from || to) {
-        const board = await Board
-            .findById(boardId)
-            .populate('treads')
-        const treads = board.treads;
-        
-        treads.length = treads.length < to ? to + 1 : treads.length;
-        treads.splice(0, from + 1)
+        const treads = await Treads
+            .find({ boardId })
+            .skip(from)
+            .limit(to - from)
         
         res.status(200).json(treads)
         
@@ -53,7 +51,36 @@ exports.getTreads = async (req, res, next) => {
         treads = treads.treads
         res.status(200).json(treads)
     }
+}
+
+exports.oneBoard = async (req, res, next) => {
+    const { boardName } = req.params;
+    let { from, to } = req.query;
+    from = parseInt(from);
+    to = parseInt(to);
     
+    if (from || to) {
+        const board = await Board .findOne({ title: boardName })
+            .populate({
+                path: 'treads',
+                populate: {
+                    path: 'comments'
+                }
+                
+            })
+        board.treads = board.treads.slice(from - 1, to);
+        board.treads = board.treads.map(tread => {
+            tread.comments = tread.comments.slice(0, 3);
+            return tread;
+        });
+        res.status(200).json(board);
+        
+    } else {
+        const board = await Board
+            .findOne({ title: boardName })
+            .populate('treads');
+        res.json(board);
+    }
 }
 
 exports.boards = async (req, res, next) => {

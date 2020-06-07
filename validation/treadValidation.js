@@ -4,22 +4,22 @@ const Board = require('../models/boards');
 
 const bodyCheck = [
     body('title', 'Некорректный заголовок')
+        .notEmpty()
+        .withMessage('Тема нужна')
         .trim()
         .isString()
-        .isLength({ min: 1, max: 20 })
-        .withMessage('Заголовок должен быть от 1 до 10 символов'),
+        .isLength({ max: 100 })
+        .withMessage('Заголовок должен быть от 1 до 100 символов'),
     body('text')
         .trim()
         .isString()
-        .isLength({ min: 5, max: 120 })
-        .withMessage('Описание должно быть от 5 до 120 символов'),
+        .isLength({ min: 5, max: 4000 })
+        .withMessage('Описание должно быть от 5 до 2000 символов'),
     body('imagesUrl')
         .if(body('imagesUrl').exists())
         .isArray()
         .withMessage('Не массив')
-        .custom((value, context) =>
-            value.every(url => isURL(url))
-        )
+        .custom((value, context) => value.every(img => isURL(img.url)))
         .withMessage('ссылки должны быть валидным url')
 ]
 

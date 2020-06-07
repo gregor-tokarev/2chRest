@@ -5,9 +5,9 @@ const Boards = require('./boards');
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema({
-    title: {
+    name: {
         type: String,
-        required: true
+        default: 'Аноним'
     },
     text: {
         type: String,

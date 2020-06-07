@@ -5,6 +5,8 @@ const validator = require('../validation/commentValidation');
 
 const commentController = require('../controllers/commentsController')
 
+router.get('/:treadId', commentController.get);
+
 router.post('/:treadId', validator.create, commentController.create);
 
 router.put('/:commentId', tokenCheck, validator.edit, commentController.edit);

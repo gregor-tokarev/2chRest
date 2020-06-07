@@ -18,5 +18,8 @@
     "mongoose": "^5.9.14",
     "socket.io": "^2.3.0",
     "validator": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }

@@ -37,7 +37,7 @@ mongoose.set('useCreateIndex', true);
 
 mongoose.connect(process.env.MONGO_URL)
     .then(res => {
-        const server = app.listen(process.env.PORT || 8080);
+        const server = app.listen(process.env.PORT || 8000);
         const io = socketManager.init(server);
     })
     .catch(err => {

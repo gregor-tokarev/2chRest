@@ -5,6 +5,32 @@ const fs = require('fs');
 const { validationResult } = require('express-validator');
 const { getSocket } = require('../core/socket');
 
+
+exports.get = async (req, res, next) => {
+    const treadId = req.params.treadId;
+    let { from, to } = req.query;
+    
+    from = parseInt(from);
+    to = parseInt(to);
+    
+    if (from || to) {
+        let comment = await Comments
+            .findOne({ treadId });
+        
+        comment = comment.slice(from - 1, to);
+        comment = comment.map(tread => {
+            tread.comments = tread.comments.slice(0, 3);
+            return tread;
+        })
+        res.status(200).json(comment);
+    } else {
+        const comments = await Comments
+            .find({ treadId });
+        
+        res.json(comments);
+    }
+}
+
 exports.create = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -14,34 +40,32 @@ exports.create = async (req, res, next) => {
         throw 'error';
     }
     
-    const { title, text, replyes } = req.body;
-    const imagesUrl = req.files.map(img => ({
-        path: img.path,
-        url: `${process.env.HOST}/images/${img.filename}`
-    }));
+    const { text, name, imagesUrl = [] } = req.body;
+    
     const treadId = req.params.treadId;
     const comment = new Comments({
         imagesUrl,
-        title,
         text,
         treadId,
-        replyes
+        name
     });
     
     const upComment = await comment.save();
     const token = jwt.sign({ accessId: upComment._id }, 'zipper.TV4')
+    
+    const tread = await Treads.findById(treadId);
+    tread.comments.push(comment._id);
+    await tread.save();
+    
+    let io = getSocket();
     res.status(201).json({
         message: 'Success',
         token,
         upComment
     });
     
-    const io = getSocket();
-    io.emit('comment', upComment)
-    
-    const tread = await Treads.findById(treadId);
-    tread.comments.push(comment._id);
-    tread.save();
+    io.emit('comment', upComment);
+    io = null;
 }
 
 exports.edit = async (req, res, next) => {
@@ -53,29 +77,26 @@ exports.edit = async (req, res, next) => {
         throw 'error';
     }
     
-    const { title, text, replyes = [] } = req.body;
-    const imagesUrl = req.files.map(img => ({
-        path: img.path,
-        url: `${process.env.HOST}/images/${img.filename}`
-    }));
+    const { name, text, imagesUrl, replyes = [] } = req.body;
+    
     const commentId = req.params.commentId;
     const comment = await Comments.findById(commentId);
     
-    comment.imagesUrl.forEach(img => fs.unlink(img.path, err => console.log(err)));
-    
-    comment.title = title;
+    comment.name = name;
     comment.text = text;
     comment.imagesUrl = imagesUrl;
     comment.replyes = replyes;
+    comment._id = comment._id;
     
-    const upComment = await comment.save();
-    
-    const io = getSocket();
-    io.emit('upComment', upComment)
     res.status(201).json({
         message: 'Success',
         comment
-    })
+    });
+    
+    const upComment = await comment.save();
+    const io = getSocket();
+    io.emit('upComment', upComment);
+    
 }
 
 exports.delete = async (req, res, next) => {
@@ -85,6 +106,7 @@ exports.delete = async (req, res, next) => {
         message: `Comment ${ comment._id } was deleted successfully`,
         comment
     });
-    const io = getSocket();
+    let io = getSocket();
     io.emit('delComment', comment._id);
+    io = null;
 }

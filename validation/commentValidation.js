@@ -3,21 +3,16 @@ const Treads = require('../models/treads');
 const { isURL } = require('validator');
 
 const bodyCheck = [
-    body('title', 'Некорректный заголовок')
-        .trim()
-        .isString()
-        .isLength({ min: 1, max: 20 })
-        .withMessage('Заголовок должен быть от 1 до 10 символов'),
     body('text')
         .trim()
         .isString()
-        .isLength({ min: 5, max: 120 })
-        .withMessage('Описание должно быть от 5 до 120 символов'),
+        .isLength({ min: 5, max: 2000 })
+        .withMessage('Описание должно быть от 5 до 2000 символов'),
     body('imagesUrl')
         .if(body('imagesUrl').exists())
         .isArray()
         .custom((value, context) =>
-            value.every(url => isURL(url))
+            value.every(img => isURL(img.url))
         )
         .withMessage('ссылки должны быть валидными url')
 ];

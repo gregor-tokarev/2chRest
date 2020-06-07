@@ -6,6 +6,13 @@ const { getSocket } = require('../core/socket');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
+
+exports.getOne = async (req, res, next) => {
+    const treadId = req.params.treadId;
+    const tread = await Treads.findById(treadId).populate('comments');
+    res.status(200).json(tread);
+}
+
 exports.create = async (req, res, next) => {
     try {
         const errors = validationResult(req);
@@ -15,6 +22,7 @@ exports.create = async (req, res, next) => {
             });
             throw 'error';
         }
+    
         
         const { title, text, imagesUrl } = req.body;
         const boardId = req.params.boardId;
@@ -37,8 +45,9 @@ exports.create = async (req, res, next) => {
             tread: dbTread,
             message: 'Success'
         });
-        const io = getSocket();
+        let io = getSocket();
         io.emit('tread', dbTread);
+        io = null;
     } catch (error) {
         throw new Error(error);
     }
@@ -56,7 +65,7 @@ exports.edit = async (req, res, next) => {
     const treadId = req.params.treadId;
     const { title, text, imagesUrl } = req.body;
     
-    const tread = await Treads.findById(treadId);
+    const tread = await Treads.findById(treadId).populate('comments');
     tread.title = title;
     tread.text = text;
     tread.imagesUrl = imagesUrl
@@ -67,10 +76,9 @@ exports.edit = async (req, res, next) => {
         tread: upTread,
         message: 'Success'
     });
+    
     const io = getSocket();
     io.emit('upTread', upTread);
-    
-    
 }
 
 exports.delete = async (req, res, next) => {
