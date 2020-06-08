@@ -84,8 +84,10 @@ exports.oneBoard = async (req, res, next) => {
 }
 
 exports.boards = async (req, res, next) => {
-    const boards = await Board.find().select('-treads');
-    res.status(200).json(boards)
+    const boards = await Board.find();
+    const sanBoards = boards.map(board => ({ treadCount: board.treads.length, ...board._doc }));
+    sanBoards.forEach(board => board.treads = undefined)
+    res.status(200).json(sanBoards);
 }
 
 exports.getTreadsCount = async (req, res, next) => {
