@@ -10,6 +10,6 @@ exports.create = [
     body('description')
         .trim()
         .isString()
-        .isLength({ min: 5, max: 120 })
+        .isLength({ min: 4, max: 120 })
         .withMessage('Описание должно быть от 5 до 120 символов')
 ]
