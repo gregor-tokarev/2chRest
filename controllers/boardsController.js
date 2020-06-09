@@ -60,7 +60,7 @@ exports.oneBoard = async (req, res, next) => {
     to = parseInt(to);
     
     if (from || to) {
-        const board = await Board .findOne({ title: boardName })
+        const board = await Board.findOne({ title: boardName })
             .populate({
                 path: 'treads',
                 populate: {
@@ -68,6 +68,7 @@ exports.oneBoard = async (req, res, next) => {
                 }
                 
             })
+        board.treads = board.treads.sort((prev, next) => next.comments.length - prev.comments.length);
         board.treads = board.treads.slice(from - 1, to);
         board.treads = board.treads.map(tread => {
             tread.comments = tread.comments.slice(0, 3);
@@ -78,14 +79,26 @@ exports.oneBoard = async (req, res, next) => {
     } else {
         const board = await Board
             .findOne({ title: boardName })
-            .populate('treads');
+            .populate({
+                path: 'treads',
+                populate: {
+                    path: 'comments'
+                }
+            });
+        board.treads = board.treads.sort((prev, next) => next.comments.length - prev.comments.length);
+        board.treads = board.treads.map(tread => {
+            tread.comments = tread.comments.slice(0, 3);
+            return tread;
+        });
+        
         res.json(board);
     }
 }
 
 exports.boards = async (req, res, next) => {
     const boards = await Board.find();
-    const sanBoards = boards.map(board => ({ treadCount: board.treads.length, ...board._doc }));
+    let sanBoards = boards.map(board => ({ treadCount: board.treads.length, ...board._doc }));
+    sanBoards = sanBoards.sort((prev, next) => next.treads.length - prev.treads.length);
     sanBoards.forEach(board => board.treads = undefined)
     res.status(200).json(sanBoards);
 }
