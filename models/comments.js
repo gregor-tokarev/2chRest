@@ -16,6 +16,10 @@ const commentSchema = new Schema({
     imagesUrl: [{
         type: Object
     }],
+    reply: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Comments'
+    },
     replyes: [{
         type: mongoose.Types.ObjectId,
         ref: 'Comments'

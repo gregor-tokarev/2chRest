@@ -4,17 +4,15 @@ const Board = require('../models/boards');
 
 const bodyCheck = [
     body('title', 'Некорректный заголовок')
-        .notEmpty()
-        .withMessage('Тема нужна')
         .trim()
         .isString()
         .isLength({ max: 100 })
-        .withMessage('Заголовок должен быть от 1 до 100 символов'),
+        .withMessage('Заголовок должен быть до 100 символов'),
     body('text')
         .trim()
         .isString()
-        .isLength({ min: 5, max: 4000 })
-        .withMessage('Описание должно быть от 5 до 2000 символов'),
+        .isLength({ min: 4, max: 4000 })
+        .withMessage('Описание должно быть от 4 до 2000 символов'),
     body('imagesUrl')
         .if(body('imagesUrl').exists())
         .isArray()

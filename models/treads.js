@@ -5,8 +5,7 @@ const Schema = mongoose.Schema;
 
 const treadSchema = new Schema({
     title: {
-        type: String,
-        required: true
+        type: String
     },
     text: {
         type: String,

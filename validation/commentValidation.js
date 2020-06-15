@@ -6,7 +6,7 @@ const bodyCheck = [
     body('text')
         .trim()
         .isString()
-        .isLength({ min: 5, max: 2000 })
+        .isLength({ min: 4, max: 2000 })
         .withMessage('Описание должно быть от 5 до 2000 символов'),
     body('imagesUrl')
         .if(body('imagesUrl').exists())

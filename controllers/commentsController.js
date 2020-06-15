@@ -40,17 +40,26 @@ exports.create = async (req, res, next) => {
         throw 'error';
     }
     
-    const { text, name, imagesUrl = [] } = req.body;
+    const { text, name, imagesUrl = [], reply } = req.body;
     
     const treadId = req.params.treadId;
     const comment = new Comments({
         imagesUrl,
         text,
         treadId,
-        name
+        name,
+        reply
     });
     
     const upComment = await comment.save();
+    if (reply) {
+        
+        const replyComment = await Comments.findById(reply);
+        
+        replyComment.replyes.push(upComment._id);
+        await replyComment.save();
+    }
+    
     const token = jwt.sign({ accessId: upComment._id }, 'zipper.TV4')
     
     const tread = await Treads.findById(treadId);
@@ -77,7 +86,7 @@ exports.edit = async (req, res, next) => {
         throw 'error';
     }
     
-    const { name, text, imagesUrl, replyes = [] } = req.body;
+    const { name, text, imagesUrl, reply } = req.body;
     
     const commentId = req.params.commentId;
     const comment = await Comments.findById(commentId);
@@ -85,15 +94,23 @@ exports.edit = async (req, res, next) => {
     comment.name = name;
     comment.text = text;
     comment.imagesUrl = imagesUrl;
-    comment.replyes = replyes;
+    comment.reply = reply;
     comment._id = comment._id;
+    
+    const upComment = await comment.save();
+    
+    if (reply) {
+        const replyComment = await Comments.findById(reply);
+        const replyIndex = replyComment.replyes.findIndex(reply => reply === comment._id)
+        replyComment.replyes.splice(replyIndex, 1, reply)
+        await replyComment.save();
+    }
     
     res.status(201).json({
         message: 'Success',
         comment
     });
     
-    const upComment = await comment.save();
     const io = getSocket();
     io.emit('upComment', upComment);
     
@@ -101,6 +118,15 @@ exports.edit = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
     const comment = await Comments.deleteID(req.params.commentId);
+    
+    const replyComment = await Comments.findById(comment._id);
+    
+    if (replyComment) {
+        const replyIndex = replyComment.replyes.findIndex(reply => reply === comment._id)
+        replyComment.replyes.splice(replyIndex, 1);
+        
+        await replyComment.save();
+    }
     
     res.status(201).json({
         message: `Comment ${ comment._id } was deleted successfully`,
