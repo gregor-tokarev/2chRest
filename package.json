@@ -1,5 +1,5 @@
 {
-  "name": "rest",
+  "name": "2ch_rest",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "^14"
+  },
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
